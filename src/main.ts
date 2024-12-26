@@ -15,6 +15,9 @@ async function bootstrap() {
   );
   app.enableCors();
   app.useGlobalFilters(new UnauthorizedExceptionFilter());
-  await app.listen(4000,'0.0.0.0');
+  const port = process.env.PORT || 4000;
+  await app.listen(port, () => {
+    console.log('server is live and running on PORT: ' + port);
+  });
 }
 bootstrap();
