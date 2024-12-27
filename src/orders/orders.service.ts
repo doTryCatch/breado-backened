@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { OrdersDto } from './dto';
+import { OrdersDto, UpdateOrderDto } from './dto';
 
 @Injectable()
 export class OrdersService {
@@ -18,7 +18,7 @@ export class OrdersService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const isTodayOrderPlaced = await this.prisma.order.findFirst({
-        where: { user_id: userId, cleated_at: { gte: today } },
+        where: { user_id: userId, created_at: { gte: today } },
       });
       if (isTodayOrderPlaced)
         throw new UnauthorizedException(
@@ -57,6 +57,7 @@ export class OrdersService {
           data: {
             user_id: userId,
             total_price: totalPrice,
+            remaining: totalPrice,
           },
         });
 
@@ -76,6 +77,22 @@ export class OrdersService {
       throw new InternalServerErrorException(
         'An error occurred while creating the order',
       );
+    }
+  }
+  async updateOrder(
+    orderDto: UpdateOrderDto,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      await this.prisma.order.update({
+        where: { order_id: orderDto.orderId },
+        data: {
+          deposit: orderDto.depositAmount,
+          remaining: { decrement: orderDto.depositAmount },
+        },
+      });
+      return { success: true, message: 'Amount deposited successfully' };
+    } catch (error) {
+      throw new UnauthorizedException(error);
     }
   }
 }
