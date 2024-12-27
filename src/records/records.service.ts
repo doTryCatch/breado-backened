@@ -129,15 +129,7 @@ export class RecordsService {
       throw new UnauthorizedException('failed fetching sellers data :' + error);
     }
   }
-  async getProducts(): Promise<
-    {
-      product_id: number;
-      name: string;
-      price: number;
-      category: string;
-      description: string;
-    }[]
-  > {
+  async getProducts(): Promise<any> {
     try {
       const response = await this.prisma.product.findMany({
         select: {

@@ -30,15 +30,7 @@ export class RecordsController {
 
   //get all products name with their id and price
   @Get('getProducts')
-  async getProductsList(): Promise<
-    {
-      product_id: number;
-      name: string;
-      price: number;
-      category: string;
-      description: string;
-    }[]
-  > {
+  async getProductsList(): Promise<any> {
     return this.recordsService.getProducts();
   }
   //get record of orders with their calculation
