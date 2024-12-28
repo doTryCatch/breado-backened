@@ -23,12 +23,14 @@ export class AuthController {
   async handleLogin(@Body() loginCredential: loginDto, @Res() res: Response) {
     const user = await this.authService.login(loginCredential);
     console.log('user login request receive');
-    if (user) {
+    if (user.success) {
       //create jwt token
+      const { user_id, name, email, role } = user.data;
       const payload = {
-        id: user.user_id,
-        username: user.name,
-        email: user.email,
+        id: user_id,
+        username: name,
+        email: email,
+        role: role,
       };
       const token = this.jwtService.sign(payload);
 
@@ -41,10 +43,10 @@ export class AuthController {
       });
 
       // Respond with a success message and token (if needed)
-      return res.json({ success: true, message: 'Login successful' });
+      return res.json(user);
     }
     // return this.authService.login(loginCredential);
-    return res.json({ message: 'invalid way to login ' });
+    return res.json(user);
   }
 
   @UseGuards(JwtAuthGuard)
