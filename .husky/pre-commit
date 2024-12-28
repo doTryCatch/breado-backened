@@ -1,0 +1,12 @@
+
+echo "running pretteier for formatting before commit..."
+npm run format || { echo "Error on Formatting code file..."; exit 1;}
+
+echo "All files fomatted successfully!";
+echo "checking application health...";
+
+npx eslint . || { echo "Eslint error..."; exit 1; }
+echo "😀 Eslint checkup success. Ready to commit changes..."
+
+
+
