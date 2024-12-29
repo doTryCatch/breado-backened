@@ -19,6 +19,8 @@ export class ProductsService {
         data: {
           name: product.name,
           price: product.price,
+          category: product.category,
+          description: product.description,
         },
       });
       return { success: true, message: 'product added successfully' };
@@ -46,7 +48,7 @@ export class ProductsService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       await this.prisma.product.delete({
-        where: { product_id: productDto.id },
+        where: { product_id: productDto.product_id },
       });
       return { success: true, message: 'product deleted successfully' };
     } catch (error) {

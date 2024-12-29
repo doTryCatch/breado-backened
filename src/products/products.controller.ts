@@ -5,10 +5,10 @@ import {
   deleteProductDto,
   updateProducPricetDto,
 } from './dto';
-@Controller('products')
+@Controller('product')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
-  @Post()
+  @Post('add')
   async addProduct(@Body() product: createProductDto): Promise<{
     success: boolean;
     message: string;
@@ -24,7 +24,7 @@ export class ProductsController {
     return this.productsService.updateProductPrice(id, data);
   }
 
-  @Delete()
+  @Delete('delete')
   async deleteProduct(@Body() productDto: deleteProductDto): Promise<{
     success: boolean;
     message: string;
