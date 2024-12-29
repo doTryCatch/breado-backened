@@ -9,15 +9,19 @@ export class AuthService {
   async login(loginCredentials: loginDto): Promise<{
     success: boolean;
     message: string;
-    data: { user_id: number; name: string; email: string; role: string };
+    data: { user_id: number; name: string; phone: string; role: string };
   }> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { email: loginCredentials.email },
+        where: { phone: loginCredentials.phone },
       });
 
       if (!user)
-        return { success: false, message: 'Email is incorrect!', data: null };
+        return {
+          success: false,
+          message: 'Phone Number is incorrect!',
+          data: null,
+        };
 
       const isPasswordValid = await bcrypt.compare(
         loginCredentials.password,
@@ -31,12 +35,12 @@ export class AuthService {
           data: null,
         };
 
-      const { user_id, name, email, role } = user;
+      const { user_id, name, phone, role } = user;
 
       return {
         success: true,
         message: 'Login successful!',
-        data: { user_id, name, email, role },
+        data: { user_id, name, phone, role },
       };
     } catch (error) {
       throw new UnauthorizedException('Unexpected Error: ' + error);
@@ -45,14 +49,14 @@ export class AuthService {
   async signUp(
     signUpCredentials: signUpDto,
   ): Promise<{ message: string; success: boolean }> {
-    const { name, email, password } = signUpCredentials;
-    const isUserEmailAlreadyExists = await this.prisma.user.findUnique({
+    const { name, phone, password } = signUpCredentials;
+    const isUserPhoneAlreadyExists = await this.prisma.user.findUnique({
       where: {
-        email: email,
+        phone: phone,
       },
     });
-    if (isUserEmailAlreadyExists)
-      return { message: 'Email already exist!', success: false };
+    if (isUserPhoneAlreadyExists)
+      return { message: 'Phone Number already exist!', success: false };
     const isUserNameAlreadyExists = await this.prisma.user.findFirst({
       where: {
         name: name,
@@ -65,7 +69,7 @@ export class AuthService {
       await this.prisma.user.create({
         data: {
           name: name,
-          email: email,
+          phone: phone,
           password: hashPassword,
         },
       });

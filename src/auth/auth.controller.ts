@@ -25,11 +25,11 @@ export class AuthController {
     console.log('user login request receive');
     if (user.success) {
       //create jwt token
-      const { user_id, name, email, role } = user.data;
+      const { user_id, name, phone, role } = user.data;
       const payload = {
         id: user_id,
         username: name,
-        email: email,
+        phone: phone,
         role: role,
       };
       const token = this.jwtService.sign(payload);

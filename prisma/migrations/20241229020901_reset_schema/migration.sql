@@ -1,15 +1,12 @@
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('audience', 'seller', 'manager');
-
 -- CreateTable
 CREATE TABLE "users" (
     "user_id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "Role" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'audience',
+    "phone" TEXT NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("user_id")
 );
@@ -21,6 +18,8 @@ CREATE TABLE "products" (
     "price" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "category" TEXT,
+    "description" TEXT,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("product_id")
 );
@@ -30,9 +29,10 @@ CREATE TABLE "orders" (
     "order_id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "total_price" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "deposit" INTEGER NOT NULL DEFAULT 0,
+    "remaining" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "orders_pkey" PRIMARY KEY ("order_id")
 );
@@ -48,20 +48,8 @@ CREATE TABLE "order_items" (
     CONSTRAINT "order_items_pkey" PRIMARY KEY ("order_item_id")
 );
 
--- CreateTable
-CREATE TABLE "seller_orders" (
-    "seller_order_id" SERIAL NOT NULL,
-    "seller_id" INTEGER NOT NULL,
-    "total_price" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "seller_orders_pkey" PRIMARY KEY ("seller_order_id")
-);
-
 -- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE UNIQUE INDEX "users_phone_key" ON "users"("phone");
 
 -- AddForeignKey
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -71,6 +59,3 @@ ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("product_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "seller_orders" ADD CONSTRAINT "seller_orders_seller_id_fkey" FOREIGN KEY ("seller_id") REFERENCES "users"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
