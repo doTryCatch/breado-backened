@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrdersDto, UpdateOrderDto } from './dto';
 
@@ -17,14 +13,17 @@ export class OrdersService {
       const { userId, products } = orderDto;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
       const isTodayOrderPlaced = await this.prisma.order.findFirst({
         where: { user_id: userId, created_at: { gte: today } },
       });
-      if (isTodayOrderPlaced)
+
+      if (isTodayOrderPlaced) {
         return {
           success: false,
-          message: 'An Order has been placed already from this seller',
+          message: 'An order has already been placed today by this user',
         };
+      }
 
       const productIds = products.map((product) => product.productId);
 
@@ -39,10 +38,9 @@ export class OrdersService {
           (p) => p.product_id === product.productId,
         );
         if (!productDetail) {
-          return {
-            success: false,
-            message: `Product with ID ${product.productId} not found`,
-          };
+          throw new InternalServerErrorException(
+            `Product with ID ${product.productId} not found`,
+          );
         }
         const eachItemTotalPrice =
           productDetail.price * product.productQuantity;
@@ -71,20 +69,38 @@ export class OrdersService {
           })),
         });
       });
+
       return { success: true, message: 'Order created successfully' };
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error; // rethrow known exceptions
-      }
+      console.error(error);
       throw new InternalServerErrorException(
         'An error occurred while creating the order',
       );
     }
   }
+
   async updateOrder(
     orderDto: UpdateOrderDto,
   ): Promise<{ success: boolean; message: string }> {
     try {
+      const order = await this.prisma.order.findUnique({
+        where: { order_id: orderDto.orderId },
+      });
+
+      if (!order) {
+        return {
+          success: false,
+          message: 'internal server error: Order not found',
+        };
+      }
+
+      if (order.remaining < orderDto.depositAmount) {
+        return {
+          success: false,
+          message: 'Deposit amount exceeds the remaining balance',
+        };
+      }
+
       await this.prisma.order.update({
         where: { order_id: orderDto.orderId },
         data: {
@@ -92,9 +108,13 @@ export class OrdersService {
           remaining: { decrement: orderDto.depositAmount },
         },
       });
+
       return { success: true, message: 'Amount deposited successfully' };
     } catch (error) {
-      throw new UnauthorizedException(error);
+      console.error(error);
+      throw new InternalServerErrorException(
+        'An error occurred while updating the order',
+      );
     }
   }
 }
