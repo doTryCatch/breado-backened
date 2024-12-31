@@ -6,7 +6,7 @@ export class OrderProductDto {
   productId: number;
 
   @IsInt()
-  @Min(0) // Ensure quantity is at least 1
+  @Min(1) // Ensure quantity is at least 1
   productQuantity: number;
 }
 

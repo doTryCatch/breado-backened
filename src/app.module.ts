@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { RecordsModule } from './records/records.module';
+import { ExpenseModule } from './expense/expense.module';
 config();
 @Module({
   imports: [
@@ -27,6 +28,7 @@ config();
     ProductsModule,
     OrdersModule,
     RecordsModule,
+    ExpenseModule,
   ],
 })
 export class AppModule {}

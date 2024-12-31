@@ -9,6 +9,11 @@ import { RecordsService } from './records.service';
 import { JwtAuthGuard } from 'src/comman/guards/auth.guard';
 import { RolesGuard } from 'src/comman/guards/role.guard';
 import { Roles } from 'src/comman/guards/role.decorator';
+import {
+  ExpenseGroupedByDateDto,
+  ExpenseGroupedByNameDto,
+  TotalExpenseDto,
+} from './dto/expense.dto';
 
 @Controller('records')
 export class RecordsController {
@@ -47,5 +52,26 @@ export class RecordsController {
   //get record of orders with their calculation of per day in total
   async getAllOrderStat(): Promise<any> {
     return this.recordsService.getOrderStat();
+  }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('manager')
+  @Get('expenseOverview')
+  async getExpenseOverview(): Promise<{
+    expensesGroupedByDate: ExpenseGroupedByDateDto[];
+    expensesGroupedByName: ExpenseGroupedByNameDto[];
+    totalExpenseTillDate: TotalExpenseDto;
+  }> {
+    const expensesGroupedByDate =
+      await this.recordsService.getExpensesGroupedByDate();
+    const expensesGroupedByName =
+      await this.recordsService.getExpensesGroupedByName();
+    const totalExpenseTillDate =
+      await this.recordsService.getTotalExpenseTillDate();
+
+    return {
+      expensesGroupedByDate,
+      expensesGroupedByName,
+      totalExpenseTillDate,
+    };
   }
 }

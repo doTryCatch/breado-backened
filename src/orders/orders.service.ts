@@ -94,13 +94,6 @@ export class OrdersService {
         };
       }
 
-      if (order.remaining < orderDto.depositAmount) {
-        return {
-          success: false,
-          message: 'Deposit amount exceeds the remaining balance',
-        };
-      }
-
       await this.prisma.order.update({
         where: { order_id: orderDto.orderId },
         data: {

@@ -1,5 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import {
+  ExpenseGroupedByDateDto,
+  ExpenseGroupedByNameDto,
+  TotalExpenseDto,
+} from './dto/expense.dto';
 
 @Injectable()
 export class RecordsService {
@@ -35,17 +40,19 @@ export class RecordsService {
 
           return {
             date,
-            order: {
-              userId: order.user_id,
-              username: order.user.name,
-              totalOrderCost: order.total_price,
-              paidAmountForOrder: order.deposit,
-              productDetails: order.orderItems.map((item) => ({
-                productName: item.product.name,
-                quantity: item.quantity,
-                totalPriceOfRespectiveProductItem: item.total_price,
-              })),
-            },
+            order: [
+              {
+                sellerId: order.user_id,
+                sellerName: order.user.name,
+                totalOrderCost: order.total_price,
+                paidAmountForOrder: order.deposit,
+                products: order.orderItems.map((item) => ({
+                  name: item.product.name,
+                  quantity: item.quantity,
+                  totalPrice: item.total_price,
+                })),
+              },
+            ],
           };
         });
 
@@ -186,6 +193,73 @@ export class RecordsService {
       return result;
     } catch (error) {
       throw new UnauthorizedException('failed fetching order stats:' + error);
+    }
+  }
+  // Group by Date with error handling and correct return structure
+  async getExpensesGroupedByDate(): Promise<ExpenseGroupedByDateDto[]> {
+    try {
+      const groupedData = await this.prisma.expense.groupBy({
+        by: ['createdAt'],
+        _sum: {
+          amount: true, // Total amount spent on each date
+        },
+        orderBy: {
+          createdAt: 'desc', // Sort by date descending
+        },
+      });
+
+      return groupedData.map((item) => ({
+        date: item.createdAt,
+        amount: item._sum.amount,
+      }));
+    } catch (error) {
+      throw new UnauthorizedException(
+        'Failed to fetch expenses grouped by date' + error,
+      );
+    }
+  }
+
+  // Group by Name with error handling and correct return structure
+  async getExpensesGroupedByName(): Promise<ExpenseGroupedByNameDto[]> {
+    try {
+      const groupedData = await this.prisma.expense.groupBy({
+        by: ['name'],
+        _sum: {
+          amount: true, // Total amount spent on each name
+        },
+        orderBy: {
+          _sum: {
+            amount: 'desc', // Sort by total amount descending
+          },
+        },
+      });
+      const result = groupedData.map((item) => ({
+        name: item.name,
+        amount: item._sum.amount,
+      }));
+      return result;
+    } catch (error) {
+      throw new UnauthorizedException(
+        'Failed to fetch expenses grouped by name' + error,
+      );
+    }
+  }
+
+  // Group by Total Expense Till Date with error handling and correct return structure
+  async getTotalExpenseTillDate(): Promise<TotalExpenseDto> {
+    try {
+      const totalExpense = await this.prisma.expense.aggregate({
+        _sum: {
+          amount: true, // Sum of all expenses till date
+        },
+      });
+      return {
+        totalExpense: totalExpense._sum.amount,
+      };
+    } catch (error) {
+      throw new UnauthorizedException(
+        'Failed to fetch total expense till date' + error,
+      );
     }
   }
 }
