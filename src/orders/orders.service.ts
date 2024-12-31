@@ -21,9 +21,11 @@ export class OrdersService {
         where: { user_id: userId, created_at: { gte: today } },
       });
       if (isTodayOrderPlaced)
-        throw new UnauthorizedException(
-          'An Order has been placed already from this seller',
-        );
+        return {
+          success: false,
+          message: 'An Order has been placed already from this seller',
+        };
+
       const productIds = products.map((product) => product.productId);
 
       const productDetails = await this.prisma.product.findMany({
@@ -37,9 +39,10 @@ export class OrdersService {
           (p) => p.product_id === product.productId,
         );
         if (!productDetail) {
-          throw new UnauthorizedException(
-            `Product with ID ${product.productId} not found`,
-          );
+          return {
+            success: false,
+            message: `Product with ID ${product.productId} not found`,
+          };
         }
         const eachItemTotalPrice =
           productDetail.price * product.productQuantity;
@@ -68,7 +71,6 @@ export class OrdersService {
           })),
         });
       });
-
       return { success: true, message: 'Order created successfully' };
     } catch (error) {
       if (error instanceof UnauthorizedException) {

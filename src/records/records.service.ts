@@ -49,10 +49,6 @@ export class RecordsService {
           };
         });
 
-        if (!sellerRecords.length) {
-          throw new UnauthorizedException('No records found for the seller');
-        }
-
         return {
           success: true,
           data: formattedData,
