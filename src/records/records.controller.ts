@@ -18,7 +18,7 @@ export class RecordsController {
   @Get('getRecord')
   async getRecord(@Req() req) {
     const user: { id: number; role: string } = {
-      id: req.user.user_id,
+      id: req.user.id,
       role: req.user.role,
     };
     if (!user.id) {
