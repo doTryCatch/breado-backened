@@ -10,7 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { loginDto, signUpDto } from './dto';
-import { JwtAuthGuard } from 'src/comman/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/comman/guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
@@ -37,7 +37,7 @@ export class AuthController {
       //save into cookies
       res.cookie('jwt', token, {
         httpOnly: true, // Helps prevent XSS attacks
-        maxAge: 1000 * 60 * 60, // Cookie will last for 10 years (in milliseconds)
+        maxAge: 1000 * 60 * 60 * 24 * 30, // Cookie will last for 10 years (in milliseconds)
         secure: process.env.NODE_ENV === 'production', // Set to true in production for secure cookies
         sameSite: 'strict', // Helps prevent CSRF attacks
       });

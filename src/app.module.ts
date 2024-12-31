@@ -13,7 +13,12 @@ config();
     UsersModule,
     JwtModule.register({
       global: true,
-      secret: 'hackifyoucan',
+      secret:
+        process.env.SECRET_KEY ||
+        (() => {
+          console.warn('SECRET_KEY not set. Using fallback key.');
+          return 'hackifyoucan';
+        })(),
 
       signOptions: { expiresIn: '5m' },
     }),

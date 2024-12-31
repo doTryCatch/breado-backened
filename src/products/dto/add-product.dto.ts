@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Min, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class createProductDto {
   @IsNotEmpty()
@@ -7,6 +7,7 @@ export class createProductDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Min(1, { message: 'Price must be greater than zero' })
   price: number;
 
   @IsNotEmpty()
