@@ -21,7 +21,7 @@ config();
           return 'hackifyoucan';
         })(),
 
-      signOptions: { expiresIn: '5m' },
+      signOptions: { expiresIn: '4d' },
     }),
     PrismaModule,
     AuthModule,
